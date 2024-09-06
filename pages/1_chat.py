@@ -1,16 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep  5 23:18:48 2024
-
-@author: Yash_Ranjankar
-"""
-
 import streamlit as st
 from glob import glob
 import os
-# from langchain.chat_models import ChatOpenAI
-# from langchain.memory import ConversationBufferMemory
-# from langchain.chains import ConversationalRetrievalChain
 import pickle
 import faiss
 from openai import OpenAI
@@ -21,7 +11,7 @@ openai_api_key="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"
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 # vectorstore folder
-vectorstore_folder = r"C:\TKIL_Mining\vectorstore"
+vectorstore_folder = r"D:\Ellicium Assignments\Projects\TKIL-RAG\vectorstore"
 file_extention = ".pkl"
 vectorstores = glob(os.path.join(vectorstore_folder,f"*{file_extention}"))
 vectorstore_names = [os.path.basename(f).replace(f"{file_extention}","") for f in vectorstores]
@@ -30,7 +20,7 @@ def search_graph(graph, query_embedding, top_k=5):
     # Calculate similarity of query to all nodes in the graph
     node_embeddings = np.array([data['embedding'] for _, data in graph.nodes(data=True)])
     similarities = cosine_similarity([query_embedding], node_embeddings).flatten()
-    
+    print(similarities)
     # Get the top_k most similar nodes
     top_k_indices = similarities.argsort()[-top_k:][::-1]
     relevant_nodes = [graph.nodes[i]['sentence'] for i in top_k_indices]
@@ -76,7 +66,14 @@ def get_response_openai(System_Prompt: str, selected_model="gpt-4o"):
 
     return response.choices[0].message.content
 
-
+def find_page_number(pdf_path, search_text):
+    with open(pdf_path, 'rb') as file:
+        reader = PyPDF2.PdfReader(file)
+        for page_num, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if search_text in text:
+                return page_num + 1
+    return None
 
 def gpt_prompt(user_query, context):
     prompt = f"""
@@ -87,7 +84,13 @@ Task: Your objective is to respond to the given query using only the provided co
 Instructions:
 1. Ensure your answer thoroughly addresses all necessary aspects required for designing the component specified in the query.
 2. Do not include any extraneous information beyond what's needed for the design.
-3. Format your response strictly in .markdown
+3. Categorize the response into the following sections in the order mentioned. if applicable to the component:
+    Material and type
+    Design Considerations
+    Additional Reqirements
+    Special Cases
+    Summary 
+4.Format your response strictly in .markdown. Do not use headers in markdown. Just add the bold formatting.
 
 Context:
 {context}
@@ -97,7 +100,9 @@ Query:
 """
     return prompt
 
-
+st.set_page_config(page_title="DocMinds", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
+LOGO_PATH = r'D:\Ellicium Assignments\Projects\TKIL-RAG\utility\Ellicium Transparent Background 1.png'
+st.logo(LOGO_PATH,icon_image=LOGO_PATH)
 # Create Radio buttons for all the availble vector stores
 with st.sidebar:
     selected_option = st.radio("Choose a file",vectorstore_names)
@@ -106,7 +111,6 @@ st.header("Chat")
 st.write(f"Selected option: **{selected_option}**")
 
 # Load vector-store
-# vectorstore = load_faiss_index(os.path.join(vectorstore_folder, f"{selected_option}.index"))
 graph = load_graph_pkl(os.path.join(vectorstore_folder, f"{selected_option}{file_extention}"))
 
 ## CHAT
@@ -123,7 +127,7 @@ def display_chat():
             st.markdown(f":red[**AI**]: {message['content']}")
 
 # Text input for the user message
-user_input = st.text_input("You:", "")
+user_input = st.chat_input("Enter your query:")
 # Submit user input to the model
 if user_input:
     # Add the user message to session state
@@ -136,29 +140,10 @@ if user_input:
     prompt = gpt_prompt(user_input, retrieved_context)
     print(prompt)
     ai_message = get_response_openai(prompt, selected_model="gpt-4o")
-    ai_message = ai_message.replace("```markdown","")
+    ai_message = ai_message.replace("markdown","")
     
-    #
     # ai_message = f"This was retireved_context: {retrieved_context}"
     st.session_state['messages'].append({"role": "assistant", "content": ai_message})
     
     # Display the updated chat
     display_chat()
-
-
-# st.write(f"**AI**: {ai_message}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -41,6 +41,7 @@ def chunk_text(text):
 def generate_sentence_embeddings(sentences):
     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')  # Pre-trained sentence embedding model
     embeddings = model.encode(sentences)
+    print(embeddings)
     return embeddings
 
 # Step 3: Build the graph using semantic vectors

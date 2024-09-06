@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep  4 17:33:00 2024
-
-@author: Yash_Ranjankar
-"""
-
 import networkx as nx
 from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -32,8 +25,8 @@ def get_pdf_text(pdf_path):
 
 def chunk_text(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,  # Set chunk size as per your requirement
-        chunk_overlap=50  # Overlap between chunks to maintain context
+        chunk_size=500, 
+        chunk_overlap=50 
     )
     chunks = text_splitter.split_text(text)
     return chunks
@@ -77,6 +70,7 @@ def retrieve_relevant_nodes(graph, query_embedding, top_k=5):
     # Get the top_k most similar nodes
     top_k_indices = similarities.argsort()[-top_k:][::-1]
     relevant_nodes = [graph.nodes[i]['sentence'] for i in top_k_indices]
+    print(relevant_nodes)
     
     return relevant_nodes
 
@@ -94,7 +88,6 @@ def search_faiss(query, chunks, index):
     distances, indices = index.search(np.array([query_vector]).astype(np.float32), k=5)
     relevant_chunks = [chunks[i] for i in indices[0]]
     return relevant_chunks
-
 
 
 # Method 1
