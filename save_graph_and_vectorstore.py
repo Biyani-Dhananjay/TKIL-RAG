@@ -10,12 +10,17 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pdfplumber
-# from langchain.embeddings import OpenAIEmbeddings
-# from openai import OpenAI
 import pickle
 import os
 import faiss
-# from langchain.vectorstores import FAISS
+import json
+
+with open("config.json", "r") as f:
+    config = json.load(f)
+    vector_store_folder = config["VECTOR_STORE_FOLDER"]
+    pdf_path= config["PDF_PATH"]
+    LOGO_PATH = config["LOGO_PATH"]
+
 
 def get_pdf_text(pdf_path):
     # Variable to hold the entire text
@@ -105,13 +110,14 @@ def load_graph_pkl(file_path):
         G = pickle.load(f)
     return G
 
+
 # Sample Usage
 if __name__ == "__main__":
     # Vector store folder
-    vector_store_folder = r"C:\TKIL_Mining\vectorstore"
+    # vector_store_folder = r"C:\TKIL_Mining\vectorstore"
     
     # Path to the PDF file
-    pdf_path = r"C:/TKIL_Mining/Technical Specification.pdf"
+    # pdf_path = r"C:/TKIL_Mining/Technical Specification.pdf"
     
     # Get text from the pdf
     entire_text = get_pdf_text(pdf_path)
@@ -150,6 +156,7 @@ if __name__ == "__main__":
     # Search Graph
     graph = load_graph_pkl(graph_filepath)
     relevant_chunks_graph = search_graph(graph, query_embedding, top_k=10)
+    
     print(relevant_chunks_graph)
     
     a = set(relevant_chunks_faiss)

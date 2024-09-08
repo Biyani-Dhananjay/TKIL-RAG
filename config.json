@@ -1,0 +1,5 @@
+{
+    "LOGO_PATH" :  "utility\\ElliciumLogo.png",
+    "VECTOR_STORE_FOLDER" : "vectorstore",
+    "PDF_PATH" : "Technical Specification.pdf"
+}

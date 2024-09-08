@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep  5 23:00:26 2024
-
-@author: Yash_Ranjankar
-"""
-
 import streamlit as st
 import save_graph_and_vectorstore
 import os
+import json
+
+with open("config.json", "r") as f:
+    config = json.load(f)
+    vector_store_folder = config["VECTOR_STORE_FOLDER"]
+    pdf_path= config["PDF_PATH"]
+    LOGO_PATH = config["LOGO_PATH"]
 
 # Vector store folder
-vector_store_folder = r"D:\Ellicium Assignments\Projects\TKIL-RAG\vectorstore"
+# vector_store_folder = r"D:\Ellicium Assignments\Projects\TKIL-RAG\vectorstore"
 
-LOGO_PATH = r'D:\Ellicium Assignments\Projects\TKIL-RAG\utility\Ellicium Transparent Background 1.png'
+# LOGO_PATH = r'D:\Ellicium Assignments\Projects\TKIL-RAG\utility\Ellicium Transparent Background 1.png'
 st.set_page_config(page_title="DocMinds", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
 st.logo(LOGO_PATH,icon_image=LOGO_PATH)
 with st.sidebar:
@@ -38,8 +38,3 @@ if uploaded_file is not None:
     save_graph_and_vectorstore.save_graph_pickle(graph, graph_filepath)
     # Write
     st.markdown(f":blue[Created vector embeddings for **{uploaded_file.name}**]")
-    
-
-
-
-
