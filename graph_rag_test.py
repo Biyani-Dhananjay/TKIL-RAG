@@ -9,7 +9,7 @@ from openai import OpenAI
 import faiss
 from langchain.vectorstores import FAISS
 # Set your OpenAI API key
-openai_api_key = "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"
+openai_api_key = ""
 
 def get_pdf_text(pdf_path):
     # Variable to hold the entire text

@@ -37,8 +37,8 @@ embeddings = HuggingFaceInstructEmbeddings(model_name=bi_enc_dict['FlagEmbedding
                                            embed_instruction='Represent the paragraph for retrieval: ', model_kwargs={"device": DEVICE})
 
 # vectorstore = FAISS.load_local("D:/KBR-FAA/kbr_llm/test_gpt_spine/spine_vectorstore", embeddings)
-OPEN_AI_KEY = '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'
-api_key = "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"
+OPEN_AI_KEY = ''
+api_key = ""
 # Set the API key as an environment variable
 os.environ["OPENAI_API_KEY"] = api_key
 # Optionally, check that the environment variable was set correctly
@@ -133,7 +133,7 @@ def generate_evdnc_report():
             url = 'https://api.openai.com/v1/chat/completions'
             headers = {
                 'content-type': 'application/json; charset=utf-8',
-                'Authorization': 'Bearer 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'            
+                'Authorization': 'Bearer '            
             }
             sys_prompt =  f"[INST]<>Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer, you can do some formal greetings<>[/INST]"
 

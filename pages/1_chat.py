@@ -2,15 +2,18 @@ import streamlit as st
 from glob import glob
 import os
 import pickle
+import google.generativeai as genai
 import faiss
 import json
+from groq import Groq
 from openai import OpenAI
 import numpy as np
 import pdfplumber
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-# openai_api_key="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"
 openai_api_key = st.secrets["OPENAI_API_KEY"]
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+genai.configure(api_key=GOOGLE_API_KEY)
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 with open("config.json", "r") as f:
@@ -49,28 +52,68 @@ def search_faiss(query_embedding, chunks, index, top_k):
     relevant_chunks = [chunks[i] for i in indices[0]]
     return relevant_chunks
 
-def get_response_openai(System_Prompt: str, selected_model="gpt-4o"):
+def get_response_openai(System_Prompt: str):
     """
     Function used for generating response form OpenAI model
     Here we are Passing the System Prompt and Extracted text from resume.
     """
-
-    client = OpenAI(api_key=openai_api_key)
-    
     try:
+        client = OpenAI(api_key=openai_api_key)
         response = client.chat.completions.create(
-            model=selected_model,
+            model='gpt-4o',
             messages=[
                 {"role": "system", "content": System_Prompt}
                 ],
             # response_format=response_format,
             temperature=0
             )
+        return response.choices[0].message.content
+
     except Exception as e:
-        print(f"Error creating completion request for model '{selected_model}'")
+        print("Error creating completion request for OpenAI")
         raise e
 
-    return response.choices[0].message.content
+def get_response_gemini(System_Prompt: str):
+    """
+    Function used for generating response from Gemini model
+    Here we are Passing the System Prompt and Extracted text from resume.
+    """
+    try:
+        
+        client = genai.GenerativeModel('models/gemini-1.5-pro')
+        response = client.generate_content(System_Prompt, generation_config=genai.GenerationConfig(
+        temperature=0)
+        )
+        return response.text
+
+    except Exception as e:
+        print("Error creating completion request for gemini")
+        raise e
+    
+def get_response_llama3(System_Prompt: str):
+    """
+    Function used for generating response from Llama3 model
+    Here we are Passing the System Prompt and Extracted text from resume.
+    """
+    try:
+        
+        client = Groq(
+        api_key=st.secrets["GROQ_API_KEY"],
+    )
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": System_Prompt}
+                ],
+            model="llama-3.1-70b-versatile",
+        )
+
+        return chat_completion.choices[0].message.content
+
+    except Exception as e:
+        print("Error creating completion request for Llama3")
+        raise e
+    
 
 def get_page_wise_text(pdf_path):
     entire_text = {}
@@ -187,7 +230,9 @@ if user_input:
     #     print("*"*100)
     
     prompt = gpt_prompt(user_input, retrieved_context_whole)
-    ai_message = get_response_openai(prompt, selected_model="gpt-4o")
+    ai_message = get_response_llama3(prompt)
+    # ai_message = get_response_gemini(prompt)
+    # ai_message = get_response_openai(prompt)
     ai_message = ai_message.replace("markdown","")
     st.session_state['messages'].append({"role": "assistant", "content": ai_message})
     display_chat()
