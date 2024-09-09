@@ -9,7 +9,8 @@ import numpy as np
 import pdfplumber
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-openai_api_key="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"
+# openai_api_key="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"
+openai_api_key = st.secrets["OPENAI_API_KEY"]
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 with open("config.json", "r") as f:
@@ -164,7 +165,7 @@ def display_chat():
             st.markdown(f":red[**AI**]: {message['content']}")
 
 
-user_input = st.chat_input("Enter your query:")
+user_input = st.chat_input("What do you need:")
 if user_input:
     st.session_state['messages'].append({"role": "user", "content": user_input})
     
