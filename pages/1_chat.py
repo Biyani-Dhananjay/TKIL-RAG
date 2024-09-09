@@ -230,9 +230,9 @@ if user_input:
     #     print("*"*100)
     
     prompt = gpt_prompt(user_input, retrieved_context_whole)
-    ai_message = get_response_llama3(prompt)
+    # ai_message = get_response_llama3(prompt)
     # ai_message = get_response_gemini(prompt)
-    # ai_message = get_response_openai(prompt)
+    ai_message = get_response_openai(prompt)
     ai_message = ai_message.replace("markdown","")
     st.session_state['messages'].append({"role": "assistant", "content": ai_message})
     display_chat()
