@@ -224,7 +224,11 @@ if user_input:
     entire_text = get_page_wise_text(pdf_path)
     relevant_pages = get_relevant_pages(retrieved_context, entire_text)
     retrieved_context_whole = list(relevant_pages.values())
-    
+    retrieved_pages = list(relevant_pages.keys())
+    pages = ''
+    for i in range(len(retrieved_pages)-1):
+        pages+=f"{retrieved_pages[i+1]},"
+    pages = pages[:-1]
     # for chunk in retrieved_context_whole:
     #     print(chunk)
     #     print("*"*100)
@@ -234,5 +238,6 @@ if user_input:
     # ai_message = get_response_gemini(prompt)
     ai_message = get_response_openai(prompt)
     ai_message = ai_message.replace("markdown","")
+    ai_message += f"\n\nPages: {pages}"
     st.session_state['messages'].append({"role": "assistant", "content": ai_message})
     display_chat()
