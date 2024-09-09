@@ -8,8 +8,11 @@ from langchain.embeddings import OpenAIEmbeddings
 from openai import OpenAI
 import faiss
 from langchain.vectorstores import FAISS
+import json 
+import streamlit as st
 # Set your OpenAI API key
-openai_api_key = ""
+# openai_api_key = "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"
+openai_api_key = st.secrets["OPEN_AI_KEY"]
 
 def get_pdf_text(pdf_path):
     # Variable to hold the entire text
