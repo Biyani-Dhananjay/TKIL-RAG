@@ -111,7 +111,7 @@ Instructions:
         2.1 Extract and include common points from the design basis that are critical for vendors, such as noise specifications, operational requirements, and general design standards.
         2.2 Ensure that these general points are highlighted if they apply to the component being queried.
 3. Exclude Unnecessary Information:
-        3.1 Avoid unrelated details such as information about other components not mentioned in the query.
+        3.1 Avoid unrelated details such as information about other components not mentioned in the query.( for example: if the query is about high-speed couplings, exclude information about low-speed couplings)
         3.2 Exclude installation guides, safety measures, and operational details unless they directly impact the design or specification of the queried component.
 4. Focus on Vendor-Ready Specifications:
         4.1 Ensure the extracted information is ready to be shared with a vendor for pre-bid quotations. Focus on the most critical specifications that a vendor would need for providing an accurate quotation.
@@ -172,20 +172,20 @@ if user_input:
     
     retrieved_context = search_graph(graph, query_embedding, top_k=10)
     
-    for chunk in retrieved_context:
-        print(chunk)
-        print("*"*100)
+    # for chunk in retrieved_context:
+    #     print(chunk)
+    #     print("*"*100)
 
-    print("-"*100)
+    # print("-"*100)
     entire_text = get_page_wise_text(pdf_path)
     relevant_pages = get_relevant_pages(retrieved_context, entire_text)
     retrieved_context_whole = list(relevant_pages.values())
     
-    for chunk in retrieved_context_whole:
-        print(chunk)
-        print("*"*100)
+    # for chunk in retrieved_context_whole:
+    #     print(chunk)
+    #     print("*"*100)
     
-    prompt = gpt_prompt(user_input, retrieved_context)
+    prompt = gpt_prompt(user_input, retrieved_context_whole)
     ai_message = get_response_openai(prompt, selected_model="gpt-4o")
     ai_message = ai_message.replace("markdown","")
     st.session_state['messages'].append({"role": "assistant", "content": ai_message})
