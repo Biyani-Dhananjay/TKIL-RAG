@@ -25,6 +25,9 @@ from flask import Flask, request, Response, stream_with_context, json
 import requests
 import sseclient
 import json
+import streamlit as st
+
+OPEN_AI_KEY = st.secrets["OPEN_AI_KEY"]
 
 DEVICE = "cuda:6" if torch.cuda.is_available() else "cpu"
 
@@ -37,10 +40,10 @@ embeddings = HuggingFaceInstructEmbeddings(model_name=bi_enc_dict['FlagEmbedding
                                            embed_instruction='Represent the paragraph for retrieval: ', model_kwargs={"device": DEVICE})
 
 # vectorstore = FAISS.load_local("D:/KBR-FAA/kbr_llm/test_gpt_spine/spine_vectorstore", embeddings)
-OPEN_AI_KEY = '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'
-api_key = "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"
+# OPEN_AI_KEY = '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'
+# api_key = "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"
 # Set the API key as an environment variable
-os.environ["OPENAI_API_KEY"] = api_key
+# os.environ["OPENAI_API_KEY"] = api_key
 # Optionally, check that the environment variable was set correctly
 print("OPENAI_API_KEY has been set!")
 
