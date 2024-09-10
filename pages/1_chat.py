@@ -2,18 +2,18 @@ import streamlit as st
 from glob import glob
 import os
 import pickle
-import google.generativeai as genai
+# import google.generativeai as genai
 import faiss
 import json
-from groq import Groq
+# from groq import Groq
 from openai import OpenAI
 import numpy as np
 import pdfplumber
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 openai_api_key = st.secrets["OPENAI_API_KEY"]
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-genai.configure(api_key=GOOGLE_API_KEY)
+# GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+# genai.configure(api_key=GOOGLE_API_KEY)
 model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 with open("config.json", "r") as f:
@@ -73,48 +73,47 @@ def get_response_openai(System_Prompt: str):
         print("Error creating completion request for OpenAI")
         raise e
 
-def get_response_gemini(System_Prompt: str):
-    """
-    Function used for generating response from Gemini model
-    Here we are Passing the System Prompt and Extracted text from resume.
-    """
-    try:
+# def get_response_gemini(System_Prompt: str):
+#     """
+#     Function used for generating response from Gemini model
+#     Here we are Passing the System Prompt and Extracted text from resume.
+#     """
+#     try:
         
-        client = genai.GenerativeModel('models/gemini-1.5-pro')
-        response = client.generate_content(System_Prompt, generation_config=genai.GenerationConfig(
-        temperature=0)
-        )
-        return response.text
+#         client = genai.GenerativeModel('models/gemini-1.5-pro')
+#         response = client.generate_content(System_Prompt, generation_config=genai.GenerationConfig(
+#         temperature=0)
+#         )
+#         return response.text
 
-    except Exception as e:
-        print("Error creating completion request for gemini")
-        raise e
+#     except Exception as e:
+#         print("Error creating completion request for gemini")
+#         raise e
     
-def get_response_llama3(System_Prompt: str):
-    """
-    Function used for generating response from Llama3 model
-    Here we are Passing the System Prompt and Extracted text from resume.
-    """
-    try:
+# def get_response_llama3(System_Prompt: str):
+#     """
+#     Function used for generating response from Llama3 model
+#     Here we are Passing the System Prompt and Extracted text from resume.
+#     """
+#     try:
         
-        client = Groq(
-        api_key=st.secrets["GROQ_API_KEY"],
-    )
+#         client = Groq(
+#         api_key=st.secrets["GROQ_API_KEY"],
+#     )
 
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": System_Prompt}
-                ],
-            model="llama-3.1-70b-versatile",
-        )
+#         chat_completion = client.chat.completions.create(
+#             messages=[
+#                 {"role": "system", "content": System_Prompt}
+#                 ],
+#             model="llama-3.1-70b-versatile",
+#         )
 
-        return chat_completion.choices[0].message.content
+#         return chat_completion.choices[0].message.content
 
-    except Exception as e:
-        print("Error creating completion request for Llama3")
-        raise e
+#     except Exception as e:
+#         print("Error creating completion request for Llama3")
+#         raise e
     
-
 def get_page_wise_text(pdf_path):
     entire_text = {}
     with pdfplumber.open(pdf_path) as pdf:
@@ -148,7 +147,7 @@ Task: Your objective is to extract all relevant details for the specified compon
  
 Instructions:
 1. Extract Component-Specific Specifications:
-		1.1 It is extremetly important to get every specification related to the query.
+        1.1 It is extremetly important to get every specification related to the query.
         1.2 Include detailed technical specifications related to the component mentioned in the query (e.g., high-speed couplings, gearboxes), such as material requirements, design preferences, performance criteria, service factors, and relevant standards.
         1.3 Exclude details related to other similar components (e.g., if the query is about high-speed couplings, exclude information about low-speed couplings).
 2. Include Relevant General Requirements:
@@ -229,9 +228,9 @@ if user_input:
     for i in range(len(retrieved_pages)-1):
         pages+=f"{retrieved_pages[i+1]},"
     pages = pages[:-1]
-    # for chunk in retrieved_context_whole:
-    #     print(chunk)
-    #     print("*"*100)
+    for chunk in retrieved_context_whole:
+        print(chunk)
+        print("*"*100)
     
     prompt = gpt_prompt(user_input, retrieved_context_whole)
     # ai_message = get_response_llama3(prompt)
