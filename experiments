@@ -1,0 +1,13 @@
+    # for chunk in retrieved_context:
+    #     found  = False
+    #     for page_no, page_text in entire_text.items():
+    #         if chunk in page_text:
+    #             related_context[page_no] = page_text
+    #             found = True
+    #             break 
+        
+    #     if not found:
+    #         related_context[0] = "\n".join([related_context[0],chunk])
+            
+    # sorted_related_context = dict(sorted(related_context.items()))
+    # return sorted_related_context
