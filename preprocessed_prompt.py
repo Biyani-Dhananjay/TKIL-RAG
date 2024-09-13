@@ -86,6 +86,7 @@ Instructions:
 5. Categorize the points under appropriate headings.Headings must be in capital.
      
 Note: Give title as component name in bold and capital and then list all the points. 
+Do not miss any point related to cooling. 
 
 Context:
 
