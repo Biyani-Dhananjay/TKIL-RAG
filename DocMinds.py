@@ -19,6 +19,15 @@ st.logo(LOGO_PATH,icon_image=LOGO_PATH)
 #     st.write("Upload PDFs here")
 #     uploaded_file = st.file_uploader("Choose a file")
 
+st.html("""
+  <style>
+    [alt=Logo] {
+      height: 5rem;
+        border-radius: 2rem;
+    }
+  </style>
+        """)
+
 st.header("Welcome to DocMinds by Ellicium")
 st.write("You can upload your pdf documents here")
 st.write("These documents will be converted into vectorstores")

@@ -150,7 +150,14 @@ st.write(f"Selected option: **{selected_option}**")
 # Load vector-store
 graph = load_graph_pkl(os.path.join(vectorstore_folder, f"{selected_option}{file_extention}"))
 
-
+st.html("""
+  <style>
+    [alt=Logo] {
+      height: 5rem;
+        border-radius: 2rem;
+    }
+  </style>
+        """)
 
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
