@@ -116,47 +116,24 @@ Role: You are an expert in analyzing tenders and in mechanical system design.
 Task: Your objective is to extract all relevant details for the specified component (e.g., gearboxes, high-speed couplings, shafts) from the tender document, focusing on specifications needed for pre-bid quotations to be shared with vendors.
  
 Instructions:
-1. Extract Component-Specific Specifications:
-    1.1 It is extremely important to get every specification related to the query.
-    1.2 Include detailed technical specifications related to the component mentioned in the query (e.g high-speed couplings, gearboxes), such as material requirements, design preferences, performance criteria, service factors, and relevant standards.
-    1.3 Include specifications for associated subcomponents (e.g., shafting specifications, deflection in line shaft, reducers, holdback devices) when querying about gearboxes or similar components
-    1.4 Exclude details related to other unrelated components (e.g., if the query is about high-speed couplings, exclude information about low-speed couplings).
+1. It is extremely important to get every specification related to the query.
  
-2. Include Relevant General Requirements:
-    2.1 Extract and include common points from the design basis that are critical for vendors, such as noise specifications, operational requirements, and general design standards.
-    2.2 Ensure that these general points are highlighted if they apply to the component being queried.
-    2.3 Include specific operational requirements, such as service factors (e.g., reducer service factors, torque ratios) when applicable to the component being queried.
+2. Avoid unrelated details such as information about other components not mentioned in the query.
  
-3. Exclude Unnecessary Information:
-    3.1 Avoid unrelated details such as information about other components not mentioned in the query (e.g., if the query is about high-speed couplings, exclude information about low-speed couplings).
-    3.2 Exclude installation guides, safety measures, and operational details unless they directly impact the design or specification of the queried component.
+3. Use the exact wordings available in the provided context to ensure precision.
  
-4. Focus on Vendor-Ready Specifications:
-    4.1 Ensure the extracted information is ready to be shared with a vendor for pre-bid quotations. Focus on the most critical specifications that a vendor would need for providing an accurate quotation.
+4. Provide only relevant specifications without unnecessary information if not specifically requested.
  
-5. Use Exact Wording:
-    5.1 Use the exact wordings available in the provided context to ensure precision.
- 
-6. Formatting:
-    6.1 Format your response strictly in markdown.
-    6.2 Do not use headers in markdown.
-    6.3 Use **bold formatting** to emphasize key points.
+5. Formatting:
+    5.1 Format your response strictly in markdown.
+    5.2 Do not use headers in markdown.
+    5.3 Use **bold formatting** to emphasize key points.
  
 Context:
 {context}
  
-Important Design Consideration for all the components:
-The plant & equipment shall be designed and sized based on the following
-basic parameters including physical characteristics of raw materials and
-products to be handled.
-Noise level : 110 dB at a distance of 1m from the source of
-noise and at a height of 1.2 m above floor level
-mainly from cone crusher. For other equipment
-noise level shall be 85 dB.
- 
 Query:
 {user_query}
-Add any noise-related considerations if available
 """
     return prompt
 
@@ -192,7 +169,8 @@ user_input = st.chat_input("What do you need:")
 
 if user_input:
     st.session_state['messages'].append({"role": "user", "content": user_input})
-    if 'low speed couplings' in user_input.lower().replace("-"," ") or 'low speed coupling' in user_input.lower().replace("-"," "):
+    user_input_clean = user_input.lower().replace("-", " ").replace("  ", " ")
+    if "detailed specifications" in user_input_clean and any(phrase in user_input_clean for phrase in ['low speed couplings', 'low speed coupling', 'lowspeed coupling', 'lowspeed couplings']):
         # query = "I need to design low speed coupling.Also give requirements for designing couplings"
         # print(query)
         prompt,pages = low_speed_coupling_prompt()
@@ -200,12 +178,12 @@ if user_input:
         ai_message += f"\n\nPages: {pages}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
         # display_chat()
-    elif 'high speed couplings' in user_input.lower().replace("-"," ") or 'high speed coupling' in user_input.lower().replace("-"," "):
+    elif  "detailed specifications" in user_input_clean and any(phrase in user_input_clean for phrase in ['high speed couplings', 'high speed coupling', 'highspeed coupling', 'highspeed couplings']):
         prompt,pages = high_speed_coupling_prompt()
         ai_message = get_response_openai(prompt)
         ai_message += f"\n\nPages: {pages}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
-    elif 'gear box' in user_input.lower().replace("-"," ") or 'gearbox' in user_input.lower().replace("-"," "):
+    elif "detailed specifications" in user_input_clean and any(phrase in user_input_clean for phrase in ['gear box', 'gearbox']):
         prompt,pages = gear_box_prompt()
         ai_message = get_response_openai(prompt)
         ai_message += f"\n\nPages: {pages}"
@@ -216,12 +194,6 @@ if user_input:
         query_embedding = model.encode(query)
         
         retrieved_context,indices = search_graph(graph, query_embedding, top_k=10)
-        
-        # for chunk in retrieved_context:
-        #     print(chunk)
-        #     print("*"*100)
-
-        # print("-"*100)
         entire_text = get_page_wise_text(pdf_path)
         relevant_pages = get_relevant_pages(retrieved_context, entire_text , indices , graph)
         retrieved_context_whole = list(relevant_pages.values())
@@ -230,10 +202,6 @@ if user_input:
         for i in range(len(retrieved_pages)-1):
             pages+=f"{retrieved_pages[i+1]},"
         pages = pages[:-1]
-        # for chunk in retrieved_context_whole:
-        #     print(chunk)
-        #     print("*"*100)
-        
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
         ai_message = ai_message.replace("markdown","")
