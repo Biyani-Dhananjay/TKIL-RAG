@@ -1,5 +1,5 @@
 {
-    "LOGO_PATH" :  "joined logo.png",
+    "LOGO_PATH" :  "company logo.png",
     "VECTOR_STORE_FOLDER" : "vectorstore",
     "PDF_PATH" : "Technical Specification.pdf"
 }

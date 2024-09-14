@@ -155,8 +155,8 @@ graph = load_graph_pkl(os.path.join(vectorstore_folder, f"{selected_option}{file
 st.html("""
   <style>
     [alt=Logo] {
-      height: 5rem;
-        border-radius: 2rem;
+      height: 2rem;
+          width: 10rem;
     }
   </style>
         """)
@@ -172,55 +172,148 @@ def display_chat():
         else:
             st.markdown(f":red[AI]: {message['content']}")
 
+# if st.session_state['messages']:
+#     display_chat()
+# user_input = st.chat_input("What do you need:")
+
+# if user_input:
+#     st.session_state['messages'].append({"role": "user", "content": user_input})
+#     user_input_clean = user_input.lower().replace("-", " ").replace("  ", " ")
+#     if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['low speed couplings', 'low speed coupling', 'lowspeed coupling', 'lowspeed couplings']):
+#         prompt,pages = low_speed_coupling_prompt()
+#         ai_message = get_response_openai(prompt)
+#         ai_message += f"\n\nPages: {pages}"
+#         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
+#     if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['high speed couplings', 'high speed coupling', 'highspeed coupling', 'highspeed couplings']):
+#         prompt,pages = high_speed_coupling_prompt()
+#         ai_message = get_response_openai(prompt)
+#         ai_message += f"\n\nPages: {pages}"
+#         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
+#     if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['gear box', 'gearbox']):
+#         prompt,pages = gear_box_prompt()
+#         ai_message = get_response_openai(prompt)
+#         ai_message += f"\n\nPages: {pages}"
+#         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
+#     else:
+#         query = user_input
+    
+#         query_embedding = model.encode(query)
+        
+#         retrieved_context,indices = search_graph(graph, query_embedding, top_k=10)
+#         entire_text = get_page_wise_text(pdf_path)
+#         relevant_pages = get_relevant_pages(retrieved_context, entire_text , indices , graph)
+#         retrieved_context_whole = list(relevant_pages.values())
+#         retrieved_pages = list(relevant_pages.keys())
+#         pages = ''
+#         for i in range(len(retrieved_pages)-1):
+#             pages+=f"{retrieved_pages[i+1]},"
+#         pages = pages[:-1]
+#         prompt = gpt_prompt(query, retrieved_context_whole)
+#         ai_message = get_response_openai(prompt)
+#         ai_message = ai_message.replace("markdown","")
+#         ai_message += f"\n\nPages: {pages}"
+#         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
+        
+#     if st.session_state['messages']:
+#         latest_response = st.session_state['messages'][-1]['content']
+#         if latest_response:
+#             st.sidebar.download_button(
+#                 data = latest_response.replace("**", ""),
+#                 label = "Download Response",
+#                 file_name = "Tendor-Specifications",
+#                 mime = "text/plain"
+#             )
+#     display_chat() 
+
+component_prompts = {
+    'low speed coupling': low_speed_coupling_prompt,
+    'low speed couplings': low_speed_coupling_prompt,
+    'lowspeed coupling': low_speed_coupling_prompt,
+    'high speed couplings': high_speed_coupling_prompt,
+    'high speed coupling': high_speed_coupling_prompt,
+    'highspeed coupling': high_speed_coupling_prompt,
+    'gear box': gear_box_prompt,
+    'gearbox': gear_box_prompt 
+}
+
+# Process user input
 if st.session_state['messages']:
     display_chat()
+
 user_input = st.chat_input("What do you need:")
 
 if user_input:
+    # Append user input to session state
     st.session_state['messages'].append({"role": "user", "content": user_input})
+
+    # Clean user input
     user_input_clean = user_input.lower().replace("-", " ").replace("  ", " ")
-    if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['low speed couplings', 'low speed coupling', 'lowspeed coupling', 'lowspeed couplings']):
-        prompt,pages = low_speed_coupling_prompt()
-        ai_message = get_response_openai(prompt)
-        ai_message += f"\n\nPages: {pages}"
-        st.session_state['messages'].append({"role": "assistant", "content": ai_message})
-    if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['high speed couplings', 'high speed coupling', 'highspeed coupling', 'highspeed couplings']):
-        prompt,pages = high_speed_coupling_prompt()
-        ai_message = get_response_openai(prompt)
-        ai_message += f"\n\nPages: {pages}"
-        st.session_state['messages'].append({"role": "assistant", "content": ai_message})
-    if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]) and any(phrase in user_input_clean for phrase in ['gear box', 'gearbox']):
-        prompt,pages = gear_box_prompt()
-        ai_message = get_response_openai(prompt)
-        ai_message += f"\n\nPages: {pages}"
-        st.session_state['messages'].append({"role": "assistant", "content": ai_message})
+
+    # Check if "detailed specifications" is in the user input
+    if any(phrase in user_input_clean for phrase in ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]):
+        # Initialize variables to accumulate responses and pages
+        ai_message_total = ""
+        all_pages = []
+
+        # Iterate through each component in the dictionary
+        for component, prompt_function in component_prompts.items():
+            if component in user_input_clean:
+                
+                prompt, pages = prompt_function()
+                ai_message = get_response_openai(prompt)
+                ai_message_total += f"\n\nSpecification for {component.capitalize()}:\n{ai_message}"
+                all_pages.extend(pages.split(","))  
+
+        if ai_message_total: 
+            unique_pages = sorted(set(all_pages))  
+            pages_str = ",".join(unique_pages)
+            ai_message_total += f"\n\nPages Referred: {pages_str}"
+            st.session_state['messages'].append({"role": "assistant", "content": ai_message_total})
+        else:
+            # detailed specifications but not our component 
+            query = user_input
+            query_embedding = model.encode(query)
+            retrieved_context, indices = search_graph(graph, query_embedding, top_k=10)
+            entire_text = get_page_wise_text(pdf_path)
+            relevant_pages = get_relevant_pages(retrieved_context, entire_text, indices, graph)
+            retrieved_context_whole = list(relevant_pages.values())
+            retrieved_pages = list(relevant_pages.keys())
+            
+            # Create pages string
+            pages = ','.join(map(str, retrieved_pages))
+            
+            prompt = gpt_prompt(query, retrieved_context_whole)
+            ai_message = get_response_openai(prompt).replace("markdown", "")
+            ai_message += f"\n\nPages Referred: {pages}"
+            
+            st.session_state['messages'].append({"role": "assistant", "content": ai_message})
     else:
+        # Generalized query
         query = user_input
-    
         query_embedding = model.encode(query)
-        
-        retrieved_context,indices = search_graph(graph, query_embedding, top_k=10)
+        retrieved_context, indices = search_graph(graph, query_embedding, top_k=10)
         entire_text = get_page_wise_text(pdf_path)
-        relevant_pages = get_relevant_pages(retrieved_context, entire_text , indices , graph)
+        relevant_pages = get_relevant_pages(retrieved_context, entire_text, indices, graph)
         retrieved_context_whole = list(relevant_pages.values())
         retrieved_pages = list(relevant_pages.keys())
-        pages = ''
-        for i in range(len(retrieved_pages)-1):
-            pages+=f"{retrieved_pages[i+1]},"
-        pages = pages[:-1]
+
+        # Create pages string
+        pages = ','.join(map(str, retrieved_pages))
+
         prompt = gpt_prompt(query, retrieved_context_whole)
-        ai_message = get_response_openai(prompt)
-        ai_message = ai_message.replace("markdown","")
-        ai_message += f"\n\nPages: {pages}"
+        ai_message = get_response_openai(prompt).replace("markdown", "")
+        ai_message += f"\n\nPages Referred: {pages}"
+
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
-        
+
     if st.session_state['messages']:
         latest_response = st.session_state['messages'][-1]['content']
         if latest_response:
             st.sidebar.download_button(
-                data = latest_response.replace("**", ""),
-                label = "Download Response",
-                file_name = "Tendor-Specifications",
-                mime = "text/plain"
+                data=latest_response.replace("**", ""),
+                label="Download Response",
+                file_name="Tendor-Specifications",
+                mime="text/plain"
             )
-    display_chat() 
+
+    display_chat()
