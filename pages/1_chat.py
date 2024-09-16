@@ -186,34 +186,50 @@ if user_input:
     user_input_clean = user_input.lower().replace("-", " ").replace("  ", " ").strip()
     print(f"Normalized input: {user_input_clean}")
 
+    detailed_specification = ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]
+    all_pages = set() 
     # Check if "couplings" and/or "gearbox" are mentioned in the input
     low_speed_present = "low" in user_input_clean and "speed coupling" in user_input_clean
     high_speed_present = "high" in user_input_clean and "speed coupling" in user_input_clean
     gearbox_present = "gearbox" in user_input_clean or "gear box" in user_input_clean
+    for i in detailed_specification:
+        if i in user_input_clean:
+            detailed_specification_present = True
+            break
     print(f"Low speed present: {low_speed_present}, High speed present: {high_speed_present}, Gearbox present: {gearbox_present}")
+    
 
     # Handle the case where both high-speed and low-speed couplings, with or without gearbox, are mentioned
-    if "detailed specifications" in user_input_clean:
+    if detailed_specification_present:
         print("Handling detailed specifications...")
         combined_message = ""
+
         if low_speed_present:
             prompt_low, pages_low = low_speed_coupling_prompt()
             ai_message_low = get_response_openai(prompt_low)
             combined_message += ai_message_low + "\n\n"
             print("Response for low speed coupling generated.")
+            all_pages.update(pages_low.split(","))  # Add pages to set
         
         if high_speed_present:
             prompt_high, pages_high = high_speed_coupling_prompt()
             ai_message_high = get_response_openai(prompt_high)
             combined_message += ai_message_high + "\n\n"
             print("Response for high speed coupling generated.")
+            all_pages.update(pages_high.split(","))  # Add pages to set
 
         if gearbox_present:
             prompt_gearbox, pages_gearbox = gear_box_prompt()
             ai_message_gearbox = get_response_openai(prompt_gearbox)
             combined_message += ai_message_gearbox + "\n\n"
             print("Response for gear box generated.")
-        
+            all_pages.update(pages_gearbox.split(","))  # Add pages to set
+
+        # Sort the set and convert it back to a list
+        sorted_pages = sorted(all_pages, key=int)
+        pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
+
+        combined_message += f"Pages: {pages_string}"
         st.session_state['messages'].append({"role": "assistant", "content": combined_message})
 
     # General query handling
@@ -226,11 +242,14 @@ if user_input:
         relevant_pages = get_relevant_pages(retrieved_context, entire_text, indices, graph)
         retrieved_context_whole = list(relevant_pages.values())
         retrieved_pages = list(relevant_pages.keys())
-        pages = ','.join(str(page) for page in retrieved_pages)
+        all_pages.update(map(str, retrieved_pages))  # Add pages to set
+        sorted_pages = sorted(all_pages, key=int)  # Sort the pages
+        pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
+
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
         ai_message = ai_message.replace("markdown", "")
-        ai_message += f"\n\nPages: {pages}"
+        ai_message += f"\n\nPages: {pages_string}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
         print("General query response generated.")
 
