@@ -93,7 +93,7 @@ def get_page_wise_text(pdf_path):
 def get_links(pages):
     # pages = pages.split(",")
     reference_links = ""
-    length = len(pages_low)
+    length = len(pages)
     for i in range(min(5,length)):
         url = f"https://elli-chatbot.s3.amazonaws.com/documents-internal-demo/Technical%20Specification.pdf#page={pages[i]}"
         reference_links += url + "\n\n"
@@ -240,7 +240,7 @@ if user_input:
         combined_message += f"Pages referred: \n\n{reference_links}"
         st.session_state['messages'].append({"role": "assistant", "content": combined_message})
 
-    # General query handling
+    # General query handling    
     else:
         print("General query handling")
         query = user_input
