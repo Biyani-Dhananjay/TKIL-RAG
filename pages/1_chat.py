@@ -196,7 +196,7 @@ if user_input:
     
 
     # Handle the case where both high-speed and low-speed couplings, with or without gearbox, are mentioned
-    if detailed_specification_present:
+    if detailed_specification_present and any([low_speed_present, high_speed_present, gearbox_present]):
         print("Handling detailed specifications...")
         combined_message = ""
 
@@ -225,7 +225,7 @@ if user_input:
         sorted_pages = sorted(all_pages, key=int)
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
 
-        combined_message += f"Pages: {pages_string}"
+        combined_message += f"Pages referred: {pages_string}"
         st.session_state['messages'].append({"role": "assistant", "content": combined_message})
 
     # General query handling
@@ -247,7 +247,7 @@ if user_input:
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
         ai_message = ai_message.replace("markdown", "")
-        ai_message += f"\n\nPages: {pages_string}"
+        ai_message += f"\n\nPages referred: {pages_string}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
         print("General query response generated.")
 
@@ -257,8 +257,6 @@ if user_input:
         # latest_response_conetnt = st.session_state['messages'][-1]['content']
         # latest_response = latest_response_ai + "\n\n" + latest_response_conetnt
         latest_response = "Query:" + "\n"+ st.session_state['messages'][-2]['content'] + "\n\n"+"Response:"+"\n" + st.session_state['messages'][-1]['content']
-        print(st.session_state['messages'][-1])
-        # latest_response = st.session_state['messages'][-1]['content']
         if latest_response:
             print("Generating download button for latest response")
             st.sidebar.download_button(
