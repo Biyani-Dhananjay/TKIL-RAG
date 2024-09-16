@@ -89,6 +89,16 @@ def get_page_wise_text(pdf_path):
             entire_text[page_no + 1] = page.extract_text()
     return entire_text
 
+
+def get_links(pages):
+    # pages = pages.split(",")
+    reference_links = ""
+    length = len(pages_low)
+    for i in range(min(5,length)):
+        url = f"https://elli-chatbot.s3.amazonaws.com/documents-internal-demo/Technical%20Specification.pdf#page={pages[i]}"
+        reference_links += url + "\n\n"
+    return reference_links
+
 def get_relevant_pages(retrieved_context,entire_text,indices,graph):
     related_context = {}
     related_context[0] = " "
@@ -182,6 +192,7 @@ if user_input:
     print(f"Normalized input: {user_input_clean}")
 
     detailed_specification = ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]
+
     all_pages = set() 
     # Check if "couplings" and/or "gearbox" are mentioned in the input
     low_speed_present = "low" in user_input_clean and "speed coupling" in user_input_clean
@@ -224,8 +235,9 @@ if user_input:
         # Sort the set and convert it back to a list
         sorted_pages = sorted(all_pages, key=int)
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
+        reference_links = get_links(sorted_pages)
 
-        combined_message += f"Pages referred: {pages_string}"
+        combined_message += f"Pages referred: \n\n{reference_links}"
         st.session_state['messages'].append({"role": "assistant", "content": combined_message})
 
     # General query handling
@@ -243,11 +255,11 @@ if user_input:
         all_pages.update(map(str, retrieved_pages))  # Add pages to set
         sorted_pages = sorted(all_pages, key=int)  # Sort the pages
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
-
+        reference_links = get_links(sorted_pages)
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
         ai_message = ai_message.replace("markdown", "")
-        ai_message += f"\n\nPages referred: {pages_string}"
+        ai_message += f"\n\nPages referred: \n\n{reference_links}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
         print("General query response generated.")
 
