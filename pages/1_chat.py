@@ -192,6 +192,7 @@ if user_input:
     low_speed_present = "low" in user_input_clean and "speed coupling" in user_input_clean
     high_speed_present = "high" in user_input_clean and "speed coupling" in user_input_clean
     gearbox_present = "gearbox" in user_input_clean or "gear box" in user_input_clean
+    detailed_specification_present = False
     for i in detailed_specification:
         if i in user_input_clean:
             detailed_specification_present = True
