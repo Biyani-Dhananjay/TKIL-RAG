@@ -65,7 +65,6 @@ PyPDF2==3.0.1
 pypdfium2==4.30.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
-pywin32==306
 PyYAML==6.0.2
 referencing==0.35.1
 regex==2024.7.24
