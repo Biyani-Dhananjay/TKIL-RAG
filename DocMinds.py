@@ -23,6 +23,13 @@ st.html("""
         """)
 
 st.header("Welcome to DocMinds by Ellicium")
-st.write("You can upload your pdf documents here")
-st.write("These documents will be converted into vectorstores")
+st.write("""Upload your PDF documents and let DocMinds convert them into smart, searchable vector stores. Use the power of AI to chat with your documents, ask questions, and extract key information in real-time, all in one platform.""")
+st.markdown("""
+- Upload PDF Files: Seamlessly integrate your files into DocMinds
+- Smart Search: Access information instantly with AI-powered document search
+- Interactive Chat: Chat with your documents to get insights or specific data points.
+""")        
+ 
+st.write("""Ready to dive into your documents?
+Start by uploading your first PDF file or head to the chat section to explore your data.""")
 st.write("You can chat with these pdf files in the **chat** section")
