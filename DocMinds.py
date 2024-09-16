@@ -16,8 +16,8 @@ st.logo(LOGO_PATH,icon_image=LOGO_PATH)
 st.html("""
   <style>
     [alt=Logo] {
-      height: 2rem;
-          width: 10rem;
+      height: 45px;
+          width: 8rem;
     }
   </style>
         """)

@@ -155,8 +155,8 @@ graph = load_graph_pkl(os.path.join(vectorstore_folder, f"{selected_option}{file
 st.html("""
   <style>
     [alt=Logo] {
-      height: 2rem;
-        width: 10rem;
+      height: 45px;
+        width: 8rem;
     }
   </style>
         """)
@@ -243,6 +243,8 @@ if user_input:
         relevant_pages = get_relevant_pages(retrieved_context, entire_text, indices, graph)
         retrieved_context_whole = list(relevant_pages.values())
         retrieved_pages = list(relevant_pages.keys())
+        if 0 in retrieved_pages:
+            retrieved_pages.remove(0)
         all_pages.update(map(str, retrieved_pages))  # Add pages to set
         sorted_pages = sorted(all_pages, key=int)  # Sort the pages
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
@@ -256,7 +258,12 @@ if user_input:
 
     # Download the latest response
     if st.session_state['messages']:
-        latest_response = st.session_state['messages'][-1]['content']
+        # latest_response_ai = st.session_state['messages'][-1]['assistant']
+        # latest_response_conetnt = st.session_state['messages'][-1]['content']
+        # latest_response = latest_response_ai + "\n\n" + latest_response_conetnt
+        latest_response = "Query:" + "\n"+ st.session_state['messages'][-2]['content'] + "\n\n"+"Response:"+"\n" + st.session_state['messages'][-1]['content']
+        print(st.session_state['messages'][-1])
+        # latest_response = st.session_state['messages'][-1]['content']
         if latest_response:
             print("Generating download button for latest response")
             st.sidebar.download_button(
