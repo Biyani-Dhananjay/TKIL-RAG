@@ -48,7 +48,8 @@ def load_faiss_index(file_path):
 def search_faiss(query_embedding, chunks, index, top_k):
     distances, indices = index.search(np.array([query_embedding]).astype(np.float32), k=top_k)
     relevant_chunks = [chunks[i] for i in indices[0]]
-    return relevant_chunks
+    chunk_score = [distances[0][i] for i in indices[0]]
+    return relevant_chunks , chunk_score
 
 def get_response_openai(System_Prompt: str):
     """
@@ -91,6 +92,7 @@ def get_page_wise_text(pdf_path):
 
 
 def get_links(pages,reference_links):
+    list_of_links = []
     pages = pages.split(",")
     pages = set(pages)
     pages = list(pages)
@@ -100,7 +102,9 @@ def get_links(pages,reference_links):
         url = f"https://elli-chatbot.s3.amazonaws.com/documents-internal-demo/Technical%20Specification.pdf#page={pages[i]}"
         if url not in reference_links:
             reference_links += url + "\n\n"
-    return reference_links
+            list_of_links.append(url)
+    return reference_links , list_of_links
+
 
 def get_relevant_pages(retrieved_context,entire_text,indices,graph):
     related_context = {}
@@ -193,7 +197,6 @@ if user_input:
     # Normalize input by converting to lowercase and removing extra spaces/hyphens
     user_input_clean = user_input.lower().replace("-", " ").replace("  ", " ").strip()
     detailed_specification = ["detailed specifications", "detailed specification", "detail specification", "detail specifications"]
-
     all_pages = set() 
     # Check if "couplings" and/or "gearbox" are mentioned in the input
     low_speed_present = "low" in user_input_clean and "speed coupling" in user_input_clean
@@ -216,7 +219,11 @@ if user_input:
             ai_message_low = get_response_openai(prompt_low)
             combined_message += ai_message_low + "\n\n"
             print("Response for low speed coupling generated.")
-            reference_links = get_links(pages_low,reference_links)
+            reference_links , list_of_links = get_links(pages_low,reference_links)
+            sorted_links = sorted(list_of_links)
+            sorted_links_text = ""
+            for link in sorted_links:
+                sorted_links_text += link + "\n\n"
             all_pages.update(pages_low.split(","))  # Add pages to set
         
         if high_speed_present:
@@ -224,7 +231,11 @@ if user_input:
             ai_message_high = get_response_openai(prompt_high)
             combined_message += ai_message_high + "\n\n"
             print("Response for high speed coupling generated.")
-            reference_links = get_links(pages_high,reference_links)
+            reference_links ,list_of_links = get_links(pages_high,reference_links)
+            sorted_links = sorted(list_of_links)
+            sorted_links_text = ""
+            for link in sorted_links:
+                sorted_links_text += link + "\n\n"
             all_pages.update(pages_high.split(","))  # Add pages to set
 
         if gearbox_present:
@@ -232,15 +243,20 @@ if user_input:
             ai_message_gearbox = get_response_openai(prompt_gearbox)
             combined_message += ai_message_gearbox + "\n\n"
             print("Response for gear box generated.")
-            reference_links = get_links(pages_gearbox,reference_links)
+            reference_links ,list_of_links = get_links(pages_gearbox,reference_links)
+            sorted_links = sorted(list_of_links)
+            sorted_links_text = ""
+            for link in sorted_links:
+                sorted_links_text += link + "\n\n"
             all_pages.update(pages_gearbox.split(","))  # Add pages to set
 
         # Sort the set and convert it back to a list
         sorted_pages = sorted(all_pages, key=int)
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
         # reference_links = get_links(sorted_pages)
-
-        combined_message += f"Pages referred: \n\n{reference_links}"
+        # print("reference_links type is as follows")
+        # print(type(reference_links))
+        combined_message += f"Pages referred: \n\n{sorted_links_text}"
         st.session_state['messages'].append({"role": "assistant", "content": combined_message})
 
     # General query handling    
@@ -249,8 +265,12 @@ if user_input:
         query = user_input
         query_embedding = model.encode(query)
         retrieved_context, indices = search_graph(graph, query_embedding, top_k=10)
+        print("relevant indices are as follows")
+        print(indices)
         entire_text = get_page_wise_text(pdf_path)
         relevant_pages = get_relevant_pages(retrieved_context, entire_text, indices, graph)
+        print("relevant pages are as follows")
+        print(relevant_pages)
         retrieved_context_whole = list(relevant_pages.values())
         retrieved_pages = list(relevant_pages.keys())
         if 0 in retrieved_pages:
@@ -258,11 +278,15 @@ if user_input:
         all_pages.update(map(str, retrieved_pages))  # Add pages to set
         sorted_pages = sorted(all_pages, key=int)  # Sort the pages
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
-        reference_links = get_links(pages_string,reference_links)
+        reference_links , list_of_links = get_links(pages_string,reference_links)
+        sorted_links = sorted(list_of_links)
+        sorted_links_text = ""
+        for link in sorted_links:
+            sorted_links_text += link + "\n\n"
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
         ai_message = ai_message.replace("markdown", "")
-        ai_message += f"\n\nPages referred:\n\n{reference_links}"
+        ai_message += f"\n\nPages referred:\n\n{sorted_links_text}"
         st.session_state['messages'].append({"role": "assistant", "content": ai_message})
         print("General query response generated.")
 
