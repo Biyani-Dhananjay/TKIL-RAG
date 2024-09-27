@@ -220,9 +220,9 @@ if user_input:
             combined_message += ai_message_low + "\n\n"
             print("Response for low speed coupling generated.")
             reference_links , list_of_links = get_links(pages_low,reference_links)
-            sorted_links = sorted(list_of_links)
+            # sorted_links = sorted(list_of_links)
             sorted_links_text = ""
-            for link in sorted_links:
+            for link in list_of_links:
                 sorted_links_text += link + "\n\n"
             all_pages.update(pages_low.split(","))  # Add pages to set
         
@@ -232,9 +232,9 @@ if user_input:
             combined_message += ai_message_high + "\n\n"
             print("Response for high speed coupling generated.")
             reference_links ,list_of_links = get_links(pages_high,reference_links)
-            sorted_links = sorted(list_of_links)
+            # sorted_links = sorted(list_of_links)
             sorted_links_text = ""
-            for link in sorted_links:
+            for link in list_of_links:
                 sorted_links_text += link + "\n\n"
             all_pages.update(pages_high.split(","))  # Add pages to set
 
@@ -243,10 +243,9 @@ if user_input:
             ai_message_gearbox = get_response_openai(prompt_gearbox)
             combined_message += ai_message_gearbox + "\n\n"
             print("Response for gear box generated.")
-            reference_links ,list_of_links = get_links(pages_gearbox,reference_links)
-            sorted_links = sorted(list_of_links)
+            reference_links , list_of_links = get_links(pages_gearbox,reference_links)
             sorted_links_text = ""
-            for link in sorted_links:
+            for link in list_of_links:
                 sorted_links_text += link + "\n\n"
             all_pages.update(pages_gearbox.split(","))  # Add pages to set
 
@@ -279,9 +278,9 @@ if user_input:
         sorted_pages = sorted(all_pages, key=int)  # Sort the pages
         pages_string = ",".join(sorted_pages)  # Join sorted pages into a single string
         reference_links , list_of_links = get_links(pages_string,reference_links)
-        sorted_links = sorted(list_of_links)
+        # sorted_links = sorted(list_of_links)
         sorted_links_text = ""
-        for link in sorted_links:
+        for link in list_of_links:
             sorted_links_text += link + "\n\n"
         prompt = gpt_prompt(query, retrieved_context_whole)
         ai_message = get_response_openai(prompt)
