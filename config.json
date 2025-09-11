@@ -1,5 +1,5 @@
 {
-    "LOGO_PATH" :  "company logo.png",
+    "LOGO_PATH" : "Emergys-Logo.jpg",
     "VECTOR_STORE_FOLDER" : "vectorstore",
     "PDF_PATH" : "Technical Specification.pdf"
 }
