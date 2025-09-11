@@ -167,8 +167,8 @@ graph = load_graph_pkl(os.path.join(vectorstore_folder, f"{selected_option}{file
 st.html("""
   <style>
     [alt=Logo] {
-      height: 45px;
-        width: 8rem;
+      height: 100px;
+        width: 20rem;
     }
   </style>
         """)
